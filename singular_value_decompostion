@@ -28,7 +28,7 @@ def convert_url_to_matrix(image_url):
         print("Error")
 
 
-def matrixCalculations():
+def matrixCalculations(img_array):
     """
     Placeholder for SVD stuff 
     """
