@@ -1,9 +1,0 @@
-import math
-import numpy as np 
-from PIL import Image
-
-def compressImage(input, output, rank):
-    pass 
-
-def imageMatrix():
-    pass # return the image url as a input 

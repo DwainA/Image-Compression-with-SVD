@@ -1,0 +1,29 @@
+""" 
+This module will take in a Image URL and then display a new Image after 
+running it through the mathematical process of singular value decomposition
+"""
+
+#Reading Image URL
+import cv2
+import urllib
+#Main Libraries for SVD Calculatoes
+import numpy as np
+from numpy import linalg as compute
+from PIL import Image
+#Useful for me
+import math
+
+
+def convert_url_to_matrix(imageurl):
+    """
+    Returns a symmetric 2D Array, otherwise known as a matrix, given an image url (JavaScript Front End)
+
+    This function works assumming imageurl is a valid image url.
+    """
+    
+
+def matrixCalculations():
+    """
+    Placeholder for SVD stuff 
+    """
+    pass
