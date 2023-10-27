@@ -1,35 +1,86 @@
-""" 
-This module will take in a Image URL and then display a new Image after 
-running it through the mathematical process of singular value decomposition
+"""
+Currently meant to be run as a module in terminal, granted you have the libraries downloaded (10/26), otherwise functional. Any errors/bugs? Bounce me an email at dka36@cornell.edu
 """
 
-#Reading Image URL
-import urllib
-import cv2
-#Main Libraries for SVD Calculatoes
+
+import requests
 import numpy as np
-from numpy import linalg as compute
-from PIL import Image
-#Useful for me
-import math
+import cv2
+import matplotlib.pyplot as plt
+from urllib.parse import urlparse
 
-
-def convert_url_to_matrix(image_url):
+#helper func assertion error for urls
+def is_valid_url(url):
     """
-    Returns a symmetric 2D Array, otherwise known as a matrix, given an image url (JavaScript Front End)
+    Check if the given URL is in a valid format.
 
-    This function works assumming imageurl is a valid image url.
+    Parameters:
+    url (str): The URL to be checked.
+
+    Returns:
+    bool: True if the URL is valid, False otherwise.
     """
     try:
-        response = urllib.request.urlopen(image_url)
-        img_array = cv2.imdecode(bytearray(response.read()), cv2.IMREAD_COLOR)
-        return img_array
+        result = urlparse(url)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
+
+def load_image(image_url):
+    """
+    Load an image from the given URL.
+    """
+    assert is_valid_url()
+    try:
+        response = requests.get(image_url)
+        if response.status_code == 200:
+            image_data = np.frombuffer(response.content, np.uint8)
+            image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
+            return image
     except:
-        print("Error")
+        raise Exception(f"Failed to load image from URL: {image_url}")
 
+def image_to_matrix(image):
+    """
+    Convert an image to a matrix while keeping the color intact.
+    """
+    return image.astype(float)
 
-def matrixCalculations(img_array):
+def compress_svd(matrix, rank): #can be further optimized
     """
-    Placeholder for SVD stuff 
+    Apply Singular Value Decomposition (SVD) and compress the matrix to the given rank.
     """
-    pass
+    U, s, Vt = np.linalg.svd(matrix, full_matrices=False)
+    compressed_matrix = np.dot(U[:, :rank], np.dot(np.diag(s[:rank]), Vt[:rank, :]))
+    return compressed_matrix
+
+def display_image_and_matrix(image, matrix, title):
+    """
+    Display both the image and the matrix.
+    """
+    plt.figure(figsize=(10, 5))
+
+    # For image display
+    plt.subplot(1, 2, 1)
+    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.title("Original Image")
+    plt.axis('off')
+
+    # For matrix display
+    plt.subplot(1, 2, 2)
+    plt.imshow(matrix.astype(np.uint8))
+    plt.title(title)
+    plt.axis('off')
+    plt.show()
+
+def main(image_url, rank):
+    image = load_image(image_url)
+    matrix = image_to_matrix(image)
+    display_image_and_matrix(image, matrix, "Original Matrix")
+    compressed_matrix = compress_svd(matrix, rank)
+    display_image_and_matrix(compressed_matrix, compressed_matrix, f"Compressed Matrix (Rank {rank})")
+
+if __name__ == "__main__":
+    image_url = input("Enter the image URL: ")
+    rank = int(input("Enter the rank for compression: "))
+    main(image_url, rank)
